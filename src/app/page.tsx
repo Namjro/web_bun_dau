@@ -17,6 +17,7 @@ export default function Home() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [thumbHeight, setThumbHeight] = useState(60);
+  const isDraggingRef = useRef(false);
 
   // Update thumb size & position based on inner scroll
   const updateScrollState = useCallback(() => {
@@ -31,42 +32,70 @@ export default function Home() {
       return;
     }
 
-    const calculatedThumbHeight = Math.max(36, Math.min(trackH, (clientHeight / scrollHeight) * trackH));
+    const calculatedThumbHeight = Math.max(40, Math.min(trackH, (clientHeight / scrollHeight) * trackH));
     setThumbHeight(calculatedThumbHeight);
 
     const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
-    const availableTrack = trackH - calculatedThumbHeight;
+    const availableTrack = Math.max(0, trackH - calculatedThumbHeight);
     setScrollProgress(progress * availableTrack);
   }, []);
 
-  // Listen to inner scroll and resize
+  // Listen to inner scroll and resize with ResizeObserver
   useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
     updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("resize", updateScrollState);
-    return () => window.removeEventListener("resize", updateScrollState);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        updateScrollState();
+      });
+      resizeObserver.observe(el);
+      if (el.firstElementChild) {
+        resizeObserver.observe(el.firstElementChild);
+      }
+    }
+
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
   }, [updateScrollState]);
 
   // Global wheel listener on desktop: scrolling anywhere moves the inner content
   useEffect(() => {
     const handleGlobalWheel = (e: WheelEvent) => {
       if (window.innerWidth >= 1280 && scrollRef.current) {
-        scrollRef.current.scrollTop += e.deltaY;
+        if ((e.target as HTMLElement)?.closest?.('[role="dialog"]') || document.body.style.overflow === "hidden") {
+          return;
+        }
+        // If scrolling outside the inner scroll container, transfer the scroll
+        if (!scrollRef.current.contains(e.target as Node)) {
+          scrollRef.current.scrollTop += e.deltaY;
+        }
       }
     };
     window.addEventListener("wheel", handleGlobalWheel, { passive: true });
     return () => window.removeEventListener("wheel", handleGlobalWheel);
   }, []);
 
-  // Dragging the external scrollbar thumb
+  // Dragging the scrollbar thumb
   const handleThumbMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    isDraggingRef.current = false;
     const startY = e.clientY;
     const startScrollTop = scrollRef.current ? scrollRef.current.scrollTop : 0;
     document.body.style.userSelect = "none";
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (!scrollRef.current || !trackRef.current) return;
+      isDraggingRef.current = true;
       const deltaY = moveEvent.clientY - startY;
       const { scrollHeight, clientHeight } = scrollRef.current;
       const trackH = trackRef.current.clientHeight;
@@ -82,20 +111,27 @@ export default function Home() {
       document.body.style.userSelect = "";
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 80);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Clicking on the external track to jump
+  // Clicking on the track to jump smoothly
   const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDraggingRef.current) return;
     if (!trackRef.current || !scrollRef.current) return;
     const rect = trackRef.current.getBoundingClientRect();
     const clickY = e.clientY - rect.top;
     const { scrollHeight, clientHeight } = scrollRef.current;
     const trackH = rect.height;
-    const clickRatio = Math.max(0, Math.min(1, (clickY - thumbHeight / 2) / (trackH - thumbHeight)));
+    const availableTrack = trackH - thumbHeight;
+    if (availableTrack <= 0) return;
+
+    const clickRatio = Math.max(0, Math.min(1, (clickY - thumbHeight / 2) / availableTrack));
     const maxScroll = scrollHeight - clientHeight;
     scrollRef.current.scrollTo({
       top: clickRatio * maxScroll,
@@ -177,7 +213,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Thanh Scrollbar nằm sát mép lề phải của màn hình trên Desktop (>= 1280px) */}
+        {/* Thanh Scrollbar nằm sát mép lề phải của màn hình trên Desktop (>= 1280px) - Vị trí ban đầu */}
         <div
           ref={trackRef}
           onClick={handleTrackClick}
