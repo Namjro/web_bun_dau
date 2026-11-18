@@ -109,7 +109,7 @@ export default function Home() {
       <DecorElements />
 
       {/* Frame Container & External Scrollbar Wrapper */}
-      <div className="w-full flex-1 flex flex-col relative xl:max-w-[min(1290px,calc((100vh-32px)*1.344))] xl:aspect-[1290/960] xl:h-auto xl:max-h-[calc(100vh-32px)]">
+      <div className="w-full flex-1 flex flex-col relative xl:max-w-[min(1290px,calc(100vw-64px))] xl:h-[min(960px,calc(100vh-32px))] xl:max-h-[calc(100vh-32px)]">
         {/* Frame Container:
             - Mobile & iPad/iPad Pro (< 1280px): BỎ KHUNG, hiển thị web tràn toàn màn hình native
             - Desktop (>= 1280px): Hiển thị khung iPad Pro viền mỏng 16px thanh lịch, bo góc 32px mềm mại */}

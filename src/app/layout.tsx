@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { CartProvider } from "@/context/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
-
-const beVietnamPro = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-be-vietnam-pro",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} - Bún Đậu Nóng Giòn Giao Tận Bàn`,
@@ -37,7 +29,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={beVietnamPro.variable}>
+    <html lang="vi">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="antialiased font-sans selection:bg-[#F57C00]/20 selection:text-[#F57C00]">
         <CartProvider>
           {children}
