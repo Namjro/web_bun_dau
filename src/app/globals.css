@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-green: #2E6B3E;
+  --color-brand-green-dark: #235330;
+  --color-brand-green-light: #EAF3EC;
+  --color-cta-orange: #F57C00;
+  --color-cta-orange-hover: #E65100;
+  --color-cta-orange-light: #FFF3E0;
+  --color-background-primary: #F7F5EE;
+  --color-background-subtle: #F0ECE1;
+  --color-surface-card: #FFFFFF;
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-muted: #78716C;
+  --color-border-divider: #E7E5E4;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-be-vietnam-pro), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* On mobile & iPad/iPad Pro (< 1280px): Natural native web scrolling */
+@media (max-width: 1279px) {
+  html,
+  body {
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* On large desktop (>= 1280px): 1-screen fit, content scrolls inside frame with external scrollbar */
+@media (min-width: 1280px) {
+  html,
+  body {
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Hide scrollbar completely while maintaining scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
