@@ -207,3 +207,145 @@ export function TraSuaBestSellers({
     </section>
   );
 }
+
+function TraSuaMenuSectionRowMobile({
+  sectionId,
+  title,
+  products,
+  searchQuery,
+  onAddProduct,
+}: TraSuaMenuSectionRowProps) {
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const filtered = searchQuery.trim()
+    ? products.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+    : products;
+
+  if (filtered.length === 0) return null;
+
+  const itemsPerPage = 2;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  const activePage = Math.min(pageIndex, totalPages - 1);
+  const visibleItems = filtered.slice(
+    activePage * itemsPerPage,
+    activePage * itemsPerPage + itemsPerPage
+  );
+
+  const handlePrev = () => {
+    setPageIndex((prev) => (prev > 0 ? prev - 1 : totalPages - 1));
+  };
+
+  const handleNext = () => {
+    setPageIndex((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
+  };
+
+  return (
+    <div
+      id={`tra-sua-mobile-section-${sectionId}`}
+      className="w-full flex flex-col gap-2.5 px-3 py-1.5 shrink-0"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between w-full">
+        <h2 className="font-bold text-[17px] sm:text-[19px] text-black m-0 flex items-center gap-1.5">
+          <span className="inline-block size-2 rounded-full bg-[#ff6b35]" />
+          {title}
+        </h2>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label={`Trang trước - ${title}`}
+            className="size-8 rounded-[8px] bg-[#e0e0e0] active:bg-[#d0d0d0] border border-[#bbb] flex items-center justify-center shadow-[1.5px_1.5px_0px_#141414] cursor-pointer"
+          >
+            <div className="size-4 relative">
+              <img
+                alt=""
+                className="size-full object-contain rotate-180"
+                src="/tra-sua/icon-next.svg"
+              />
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label={`Trang tiếp theo - ${title}`}
+            className="size-8 rounded-[8px] bg-white active:bg-[#f4efe6] border border-black flex items-center justify-center shadow-[1.5px_1.5px_0px_#141414] cursor-pointer"
+          >
+            <div className="size-4 relative">
+              <img
+                alt=""
+                className="size-full object-contain"
+                src="/tra-sua/icon-next.svg"
+              />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Cards list */}
+      <div className="flex flex-col gap-2 w-full">
+        {visibleItems.map((item) => (
+          <div
+            key={item.id}
+            className="bg-[#f4efe6] border border-black rounded-[10px] p-2 sm:p-2.5 shadow-[2px_2px_0px_#141414] flex items-center justify-between gap-2.5 w-full"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="size-[68px] sm:size-[76px] rounded-[8px] bg-white border border-black/20 overflow-hidden shrink-0 flex items-center justify-center p-1">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="size-full object-contain pointer-events-none"
+                />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <p className="font-bold text-[14px] sm:text-[15px] text-black leading-snug line-clamp-2 m-0">
+                  {item.name}
+                </p>
+                <p className="font-extrabold text-[15px] sm:text-[16px] text-[#ff6b35] m-0 mt-1">
+                  {item.priceFormatted}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onAddProduct(item)}
+              aria-label={`Thêm ${item.name} vào giỏ`}
+              className="size-10 rounded-[8px] bg-[#ff6b35] hover:bg-[#e85a25] active:translate-y-[1px] border border-black shadow-[2px_2px_0px_#141414] flex items-center justify-center shrink-0 cursor-pointer"
+            >
+              <div className="size-4 relative">
+                <img
+                  alt=""
+                  className="size-full object-contain"
+                  src="/tra-sua/icon-plus.svg"
+                />
+              </div>
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function TraSuaBestSellersMobile({
+  searchQuery,
+  onAddProduct,
+}: TraSuaBestSellersProps) {
+  return (
+    <section className="w-full flex flex-col gap-4 pb-24">
+      {MENU_SECTIONS.map((section) => (
+        <TraSuaMenuSectionRowMobile
+          key={section.id}
+          sectionId={section.id}
+          title={section.title}
+          products={section.items}
+          searchQuery={searchQuery}
+          onAddProduct={onAddProduct}
+        />
+      ))}
+    </section>
+  );
+}

@@ -4,9 +4,13 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { TraSuaHeader } from "@/projects/tra-sua/components/TraSuaHeader";
 import {
   TraSuaHeroInner,
+  TraSuaHeroMobile,
   TraSuaHeroDrinkArtwork,
 } from "@/projects/tra-sua/components/TraSuaHero";
-import { TraSuaBestSellers } from "@/projects/tra-sua/components/TraSuaBestSellers";
+import {
+  TraSuaBestSellers,
+  TraSuaBestSellersMobile,
+} from "@/projects/tra-sua/components/TraSuaBestSellers";
 import { TraSuaOrderDrawer } from "@/projects/tra-sua/components/TraSuaOrderDrawer";
 import {
   INITIAL_BEST_SELLERS,
@@ -235,10 +239,19 @@ export function TraSuaApp() {
   const handleNavClick = (section: "menu" | "group" | "promo") => {
     if (section === "menu") {
       if (containerRef.current) {
-        containerRef.current.scrollTo({
-          top: Math.max(0, (631 - 20) * scale),
-          behavior: "smooth",
-        });
+        if (window.innerWidth < 1024) {
+          const mobileTarget = document.getElementById("tra-sua-mobile-section-best-sellers");
+          if (mobileTarget) {
+            mobileTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            containerRef.current.scrollTo({ top: 400, behavior: "smooth" });
+          }
+        } else {
+          containerRef.current.scrollTo({
+            top: Math.max(0, (631 - 20) * scale),
+            behavior: "smooth",
+          });
+        }
       }
     } else if (section === "group" || section === "promo") {
       handleOpenGroupOrder();
@@ -248,9 +261,9 @@ export function TraSuaApp() {
   const totalCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <main className="w-screen h-screen overflow-hidden bg-[#1b4332] flex flex-col px-[14px] sm:px-[18px] lg:px-[23px] pb-[12px] sm:pb-[16px] lg:pb-[20px] select-none relative">
+    <main className="w-screen h-screen overflow-hidden bg-[#1b4332] flex flex-col px-2 sm:px-[18px] lg:px-[23px] pb-2 sm:pb-[16px] lg:pb-[20px] select-none relative">
       {/* Top Green Header (node-id=6:62) */}
-      <div className="w-full h-[70px] sm:h-[80px] lg:h-[99px] shrink-0 flex items-center">
+      <div className="w-full h-[62px] sm:h-[80px] lg:h-[99px] shrink-0 flex items-center">
         <TraSuaHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -264,11 +277,12 @@ export function TraSuaApp() {
       <div
         ref={containerRef}
         onScroll={updateScrollState}
-        className="relative flex-1 w-full bg-[#fffdf9] rounded-bl-[28px] sm:rounded-bl-[36px] rounded-br-[28px] sm:rounded-br-[36px] overflow-y-auto overflow-x-hidden no-scrollbar shadow-lg scroll-smooth"
+        className="relative flex-1 w-full bg-[#fffdf9] rounded-bl-[20px] sm:rounded-bl-[36px] rounded-br-[20px] sm:rounded-br-[36px] overflow-y-auto overflow-x-hidden no-scrollbar shadow-lg scroll-smooth"
         data-node-id="6:61"
       >
+        {/* DESKTOP VIEW: Scaled 1394px Canvas */}
         <div
-          className="w-full flex justify-center"
+          className="hidden lg:flex w-full justify-center"
           style={{
             height: `${Math.ceil(totalCanvasHeight * scale)}px`,
           }}
@@ -297,13 +311,26 @@ export function TraSuaApp() {
             </div>
           </div>
         </div>
+
+        {/* MOBILE & TABLET VIEW: Responsive Natural Flow */}
+        <div className="flex lg:hidden flex-col w-full px-1.5 sm:px-3 pt-2 pb-20">
+          <TraSuaHeroMobile
+            onDeliveryOrderClick={handleOpenDeliveryOrder}
+            onGroupOrderClick={handleOpenGroupOrder}
+          />
+
+          <TraSuaBestSellersMobile
+            searchQuery={searchQuery}
+            onAddProduct={handleAddProduct}
+          />
+        </div>
       </div>
 
-      {/* THANH SCROLLBAR NẰM SÁT MÉP NGOÀI CÙNG (HOÀN TOÀN NGOÀI KHUNG XANH) */}
+      {/* THANH SCROLLBAR NẰM SÁT MÉP NGOÀI CÙNG (CHỈ TRÊN DESKTOP >= 1024px) */}
       <div
         ref={trackRef}
         onClick={handleTrackClick}
-        className="fixed right-1 sm:right-1.5 lg:right-2 top-[76px] sm:top-[86px] lg:top-[106px] bottom-[16px] sm:bottom-[20px] lg:bottom-[24px] w-2 hover:w-2.5 rounded-full bg-black/20 hover:bg-black/30 z-50 flex flex-col items-center py-1 transition-[background-color,width] cursor-pointer"
+        className="hidden lg:flex fixed right-1 sm:right-1.5 lg:right-2 top-[76px] sm:top-[86px] lg:top-[106px] bottom-[16px] sm:bottom-[20px] lg:bottom-[24px] w-2 hover:w-2.5 rounded-full bg-black/20 hover:bg-black/30 z-50 flex-col items-center py-1 transition-[background-color,width] cursor-pointer"
         title="Thanh cuộn thực đơn"
       >
         <div
@@ -315,6 +342,32 @@ export function TraSuaApp() {
           className="w-1.5 hover:w-2 rounded-full bg-[#ff6b35] hover:bg-[#e85a25] active:bg-[#d84814] shadow-sm transition-[width,background-color] cursor-grab active:cursor-grabbing"
         />
       </div>
+
+      {/* Mobile Floating Bottom Cart Bar */}
+      {totalCount > 0 && (
+        <div className="fixed bottom-3 left-3 right-3 z-40 lg:hidden bg-[#fffdf9] border-2 border-black rounded-[14px] p-2.5 sm:p-3 shadow-[4px_4px_0px_#141414] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center size-8 rounded-full bg-[#1b4332] text-white font-extrabold text-xs border border-black shadow-[1px_1px_0px_#141414]">
+              {totalCount}
+            </span>
+            <div>
+              <p className="font-extrabold text-xs sm:text-sm text-black m-0 leading-tight">
+                {groupMode ? "Đặt Nhóm (Mua 2 Tặng 1)" : `Giỏ hàng: ${totalCount} ly`}
+              </p>
+              <p className="text-[10px] sm:text-xs text-[#ff6b35] font-bold m-0 mt-0.5">
+                Giao siêu tốc 20 phút
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="px-3.5 py-2 rounded-[8px] bg-[#ff6b35] hover:bg-[#e85a25] active:translate-y-[1px] text-white font-black text-xs border border-black shadow-[2px_2px_0px_#141414] cursor-pointer whitespace-nowrap"
+          >
+            Xem đơn &rarr;
+          </button>
+        </div>
+      )}
 
       {/* Quick Toast Notification */}
       {toastMsg && (
